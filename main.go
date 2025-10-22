@@ -30,7 +30,7 @@ func main() {
 
 	addFilm := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
 
@@ -38,13 +38,15 @@ func main() {
 		director := r.FormValue("director")
 
 		if title != "" && director != "" {
-			films = append(films, Film{
+			newFilm := Film{
 				Title:    title,
 				Director: director,
-			})
-		}
+			}
+			films = append(films, newFilm)
 
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+			tmpl := template.Must(template.ParseFiles("film-card.html"))
+			tmpl.Execute(w, newFilm)
+		}
 	}
 
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css"))))
